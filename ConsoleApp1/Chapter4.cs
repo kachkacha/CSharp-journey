@@ -156,5 +156,71 @@ namespace ConsoleApp1
             int ans = x + y;
             return ans;
         }
-    }
+
+        public void ParamsArgumentModifier() {
+            double average;
+
+            // Pass in a comma-delimited list of doubles...
+            average = CalculateAverage(4.0, 3.2, 5.7, 64.22, 87.2);
+
+            // ...or pass an array of doubles.
+            double[] data = { 4.0, 3.2, 5.7 };
+            average = CalculateAverage(data);
+
+            // don't pass anything
+            average = CalculateAverage();
+        }
+
+        // with params keyword we can send multiple parameters to method which during runtime will be converted to arrays
+        // arguments with params keyword must be at the end of the list
+        public double CalculateAverage(params double[] values)
+        {
+            double sum = 0;
+            if (values.Length == 0)
+            {
+                return sum;
+            }
+            for (int i = 0; i < values.Length; i++)
+            {
+                sum += values[i];
+            }
+            return (sum / values.Length);
+        }
+
+        // method parameters can have default values ( they must be known at compile time and be at the end of the list)
+        // and we can call such methods by omitting default ones
+        public void EnterLogData(string message, string owner = "Programmer")
+        {
+            Console.WriteLine("Error: {0}", message);
+            Console.WriteLine("Owner of Error: {0}", owner);
+        }
+
+
+        public void DisplayFancyMessage(ConsoleColor textColor, ConsoleColor backgroundColor, string message)
+        {
+            // Store old colors to restore after message is printed.
+            ConsoleColor oldTextColor = Console.ForegroundColor;
+            ConsoleColor oldbackgroundColor = Console.BackgroundColor;
+            // Set new colors and print message.
+            Console.ForegroundColor = textColor;
+            Console.BackgroundColor = backgroundColor;
+            Console.WriteLine(message);
+            // Restore previous colors.
+            Console.ForegroundColor = oldTextColor;
+            Console.BackgroundColor = oldbackgroundColor;
+        }
+
+        //named parameters
+        public void NamedParams()
+        {
+            // This is OK, as positional args are listed before named args.
+            DisplayFancyMessage(ConsoleColor.Blue, message: "Testing...", backgroundColor: ConsoleColor.White);
+
+            // This is OK, all arguments are in the correct order
+            DisplayFancyMessage(textColor: ConsoleColor.White, backgroundColor: ConsoleColor.Blue, "Testing...");
+            // This is an ERROR, as positional args are listed after named args.
+            //DisplayFancyMessage(message: "Testing...", backgroundColor: ConsoleColor.White, ConsoleColor.Blue);
+        }
+
+     }
 }
