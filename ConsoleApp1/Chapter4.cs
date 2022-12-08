@@ -12,7 +12,7 @@ namespace ConsoleApp1
     {
         public void Run()
         {
-            indexAndRange();
+
         }
 
         public void ArrayInitialization()
@@ -191,6 +191,7 @@ namespace ConsoleApp1
         // and we can call such methods by omitting default ones
         public void EnterLogData(string message, string owner = "Programmer")
         {
+
             Console.WriteLine("Error: {0}", message);
             Console.WriteLine("Owner of Error: {0}", owner);
         }
@@ -222,5 +223,73 @@ namespace ConsoleApp1
             //DisplayFancyMessage(message: "Testing...", backgroundColor: ConsoleColor.White, ConsoleColor.Blue);
         }
 
-     }
+
+        // methods can be overloaded they must differ by parameter count or types
+        // we can also overload with modifiers (out, ref, in) but can ony use one of them
+        // if there also is method with optional parameter when compiler has multiple choises
+        // it chooses the first signature
+        public int Add(int x, int y)
+        {
+            return x + y;
+        }
+        public int Add(double x, double y)
+        {
+            return (int)(x + y);
+        }
+        public long Add(ref int x,ref int y)
+        {
+            return x + y;
+        }
+
+        // error because we already have overloaded method with ref modifier
+        /* 
+        public int Add(out int x, out int y)
+        {
+            return x + y;
+        }
+        */
+
+        // oneliner to check parameter for null
+        public void CheckForNull(string message, string owner = "Programmer")
+        {
+            ArgumentNullException.ThrowIfNull(message);
+            Console.WriteLine("Error: {0}", message);
+            Console.WriteLine("Owner of Error: {0}", owner);
+        }
+
+        // enums named constants can be set to different values, if value is omitted
+        // then it is increased by 1 from previous, it first value is omitted it is set to 0 
+        // we can also specify with type to use for storage (byte, short, int, long)
+        public enum EmpTypeEnum : short // size of this enum
+        {
+            Manager = 10,
+            Grunt,// 11
+            Contractor,// 12
+            VicePresident = -9
+        }
+
+        // we can use System.Enum classes static method to get value type used for storing enum
+        public void UnderlyingType()
+        {
+            EmpTypeEnum emp = EmpTypeEnum.Manager;
+            Console.WriteLine(Enum.GetUnderlyingType(emp.GetType()));
+            Console.WriteLine(Enum.GetUnderlyingType(typeof(EmpTypeEnum)));
+        }
+
+
+        public void EvaluateEnum(Enum e)
+        {
+            // Get all name-value pairs for incoming parameter.
+            Array enumData = Enum.GetValues(e.GetType());
+
+            // Now show the string name and associated value, using the D format
+            foreach (var item in enumData)
+            {
+                var typ = Enum.GetUnderlyingType(typeof(EmpTypeEnum));
+                // does not work during n format specifier
+                Console.WriteLine($"Name: {item}, Value: {item.GetHashCode()}");
+            }
+        }
+
+    }
 }
