@@ -157,7 +157,8 @@ namespace ConsoleApp1
             return ans;
         }
 
-        public void ParamsArgumentModifier() {
+        public void ParamsArgumentModifier()
+        {
             double average;
 
             // Pass in a comma-delimited list of doubles...
@@ -236,7 +237,7 @@ namespace ConsoleApp1
         {
             return (int)(x + y);
         }
-        public long Add(ref int x,ref int y)
+        public long Add(ref int x, ref int y)
         {
             return x + y;
         }
@@ -276,7 +277,7 @@ namespace ConsoleApp1
             Console.WriteLine(Enum.GetUnderlyingType(typeof(EmpTypeEnum)));
         }
 
-
+        // Enum.GetValues() example
         public void EvaluateEnum(Enum e)
         {
             // Get all name-value pairs for incoming parameter.
@@ -287,9 +288,90 @@ namespace ConsoleApp1
             {
                 var typ = Enum.GetUnderlyingType(typeof(EmpTypeEnum));
                 // does not work during n format specifier
-                Console.WriteLine($"Name: {item}, Value: {item.GetHashCode()}");
+                Console.WriteLine($"Name: {item}, Value: {item:d}");
             }
         }
+
+        // structs are lightweight classes deerived from System.ValueType 
+        // and they are allocated on stack
+        // they can not extend anything and be base for others but can
+        // implement interfaces, before using structures all fields should be
+        // initialized 
+        public struct Point
+        {
+            public int X;
+            public int Y = 0;
+            //Parameterless constructor
+            public Point()
+            {
+                X = 0;
+            }
+            // A custom constructor.
+            public Point(int xPos, int yPos)
+            {
+                X = xPos;
+                Y = yPos;
+            }
+
+            public void Increment()
+            {
+                X++;
+                Y++;
+            }
+        }
+
+        /******* QUESTION WHAT IS DIFFERENCE BETWEEN READONLY AND CONSTANT? *************/
+
+        // we can declare struct fields as readonly so that they will be immutable
+        // or the whole struct can be declarded readonly after what all its fields
+        // also should be readonly, we can also declare methods as readonly and inside
+        // them fields will not change, also if it calls non readonly functioin fields
+        // will be transfered with in modifiers so they will not change there
+        public struct PointWithReadOnly
+        {
+            // Fields of the structure.
+            public int X;
+            public readonly int Y = 8;
+            public readonly string Name;
+            // Display the current position and name.
+            public readonly void Display()
+            {
+                Console.WriteLine($"X = {X}, Y = {Y}, Name = {Name}");
+            }
+            // A custom constructor.
+            public PointWithReadOnly(int xPos, int yPos, string name)
+            {
+                X = xPos;
+                Y = yPos;
+                Name = name;
+            }
+        }
+
+        // ref structs can not implement interfaces, can not be fields to non ref structs
+        // cannot be used in async methods, iterators, lambda expressions, or local functions
+        // they don't implement IDisposable but you can use public void Dispose() method
+        public ref struct DisposableRefStruct
+        {
+            public int X;
+            public readonly int Y;
+            public readonly void Display()
+            {
+                Console.WriteLine($"X = {X}, Y = {Y}");
+            }
+            // A custom constructor.
+            public DisposableRefStruct(int xPos, int yPos)
+            {
+                X = xPos;
+                Y = yPos;
+                Console.WriteLine("Created!");
+            }
+            public void Dispose()
+            {
+                //clean up any resources here
+                Console.WriteLine("Disposed!");
+            }
+        }
+
 
     }
 }
