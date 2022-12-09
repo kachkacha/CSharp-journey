@@ -371,6 +371,48 @@ namespace ConsoleApp1
                 Console.WriteLine("Disposed!");
             }
         }
+        
+        // we create tuples simply by enclosing different types of variables in parentheses
+        // there are couple of ways declaring tuples by assigning it to var, declaring tuple's
+        // types on the left or additionally giving them names on the left or on the right side
+        // of assignment, if describled on both sides then left is dominant, by default to access
+        // tuples we can use Item1, Item2 and so on, tuples can contain other tuples
+        public void TuplesMethod()
+        {
+            var tuples1 = ("a", 3, "c", (1, 2));
+            (string, int p, string, (int, int)) tuples2 = ("a", 3, "c", tupli:(1, 2));
+            var tuples3 = tuples1.ToTuple(); // class
+            
+            Console.WriteLine(tuples1.GetType());
+            Console.WriteLine(tuples3.GetType());
+
+            var (a, _, _) = RockPaperScissors(("rock", "paper", true)); // middle and last ones are discarded
+            Console.WriteLine($"result: {a}, discarded others");
+
+            var left = (a: 5, b: 10);
+            (int? a, int? b) nullableMembers = (5, 10);
+            Console.WriteLine(left == nullableMembers); // Also true converted type of left is (long, long)
+            (long a, long b) longTuple = (5, 10);
+            Console.WriteLine(left == longTuple); // Also true comparisons performed on (long, long) tuples
+            (long a, int b) longFirst = (5, 10);
+            (int a, long b) longSecond = (5, 10);
+            Console.WriteLine(longFirst == longSecond); // Also true
+        }
+
+        // tuple as method parameter and return types using switch expression
+        public (string a, string s, bool b) RockPaperScissors((string a, string b, bool c) tupli) {
+
+            return tupli switch
+            {
+                ("rock", "paper", _) => ("Paper wins.", tupli.b, tupli.c),
+                ("rock", "scissors", _) => ("Rock wins.", tupli.b, tupli.c),
+                ("paper", "rock", _) => ("Paper wins.", tupli.b, tupli.c),
+                ("paper", "scissors", _) => ("Scissors wins.", tupli.b, tupli.c),
+                ("scissors", "rock", _) => ("Rock wins.", tupli.b, tupli.c),
+                ("scissors", "paper", _) => ("Scissors wins.", tupli.b, tupli.c),
+                (_, _, _) => ("Tie.", tupli.b, tupli.c),
+            };
+        }
 
 
     }
