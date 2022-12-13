@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -126,16 +127,15 @@ namespace ConsoleApp1
                 Console.WriteLine($"hello i am {firstName} {lastName}, {eyeColor} eyed, {age} years old");
             }
         }
-        
 
-        
         public class Phone
         {
             public string Company;
             public string Model;
             public string ReleaseDay;
 
-            public Phone(string company = "unknown", string model = "unknown", string releaseDay = "unknown") {
+            public Phone(string company = "unknown", string model = "unknown", string releaseDay = "unknown")
+            {
                 Company = company;
                 Model = model;
                 ReleaseDay = releaseDay;
@@ -148,5 +148,148 @@ namespace ConsoleApp1
 
         }
 
+        class Members
+        {
+
+            // member - private fields
+            private string name;
+            private string jobTitle;
+            private int age;
+            private double salary;
+            // member - public fields
+
+            public int count;
+
+            // member - properties exposes field safely - start with capital letter
+            public string Name
+            {
+                get { return name; }
+                set
+                {
+                    name = value;
+                }
+            }
+
+
+            // public member method can be call from other classes
+            public void Introduction(bool isFriend)
+            {
+                Console.WriteLine($"hi i am {name} i am {age} years old, i'm {jobTitle}");
+                if (isFriend)
+                {
+                    sharePrivateInfo();
+                }
+            }
+
+            // private member method can be called from inside the class only
+            private void sharePrivateInfo()
+            {
+                Console.WriteLine($"my salary is {salary}");
+            }
+
+
+            // member constructor
+            public Members()
+            {
+                name = "luffy";
+                age = 17;
+                jobTitle = "pirate";
+                salary = 1_500_000_000;
+            }
+
+
+            // entry is created in the finalizing queue when finalizers are called
+            // garbage collector invokes the process on that queue
+
+            // member - finalizer - destructor
+            ~Members()
+            {
+                // cleanup statements
+                Console.WriteLine("Object is gone");
+                Debug.Write("debug diagnostic");
+            }
+
+
+        }
+
+
+
+
+        class Box
+        {
+            //member fields
+            private int length = 3;
+            public int height;
+            private int width;
+            private int volume;
+
+            public int FrontSurace
+            {
+                get
+                {
+                    return this.length * this.height;
+                }
+            }
+
+
+            public int Width { get; set; }
+            public int Volume
+            {
+                get
+                {
+                    return this.length * this.height * this.width;
+                }
+            }
+
+            public int Height
+            {
+                get { return height; }
+                set
+                {
+                    if (value < 0)
+                    {
+                        value -= 1;
+                    }
+                    height = value;
+                }
+            }
+
+            public Box(int length, int height, int width)
+            {
+                this.length = length;
+                Height = height;
+                this.width = width;
+            }
+
+
+
+            // setter method
+            public void SetLength(int length)
+            {
+                if (length < 0)
+                {
+                    throw new ArgumentException("Length should be non negative");
+                }
+                this.length = length;
+            }
+
+            // getter method
+            public int GetLength()
+            {
+                return this.length;
+            }
+
+            public int GetVolume()
+            {
+                return this.length * this.height * this.width;
+            }
+
+            public void DisplayInfo()
+            {
+                Console.WriteLine($"length - {length}; height - {Height}; width - {this.width}; volume - {Volume}");
+            }
+
+
+        }
     }
 }
