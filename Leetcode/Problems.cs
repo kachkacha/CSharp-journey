@@ -355,5 +355,21 @@ namespace Leetcode
             return new string(res);
         }
 
+        //https://leetcode.com/problems/binary-tree-inorder-traversal/
+        public IList<int> InorderTraversal(TreeNode root)
+        {
+            var list = new List<int>();
+            InorderTraversalHelper(root, list);
+            return list;
+        }
+
+        public void InorderTraversalHelper(TreeNode root, IList<int> list)
+        {
+            if (root == null) return;
+            InorderTraversalHelper(root.left, list);
+            list.Add(root.val);
+            InorderTraversalHelper(root.right, list);
+        }
+
     }
 }
