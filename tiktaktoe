@@ -1,4 +1,4 @@
-string[,] arr;
+char[,] arr;
 Player curPlayer = Player.O;
 string message = string.Empty;
 int turn = 0;
@@ -10,10 +10,10 @@ newgame:
     while (true)
     {
         Render();
-
-        if (Checker(out string winner))
+        var gameStatus = Checker();
+        if ( gameStatus.gameFinished )
         {
-            string result = winner == string.Empty ? "It's A Tie" : $"We Have A Winner Player {(Player)((int)(curPlayer + 1) % 2)}";
+            string result = gameStatus.isWinner ? "It's A Tie" : $"We Have A Winner Player {(Player)((int)(curPlayer + 1) % 2)}";
             Console.WriteLine($"\n{result}\nPress Enter To Restart");
             Console.ReadLine();
             goto newgame;
@@ -54,47 +54,42 @@ endgame:
 
 
 
-bool Checker(out string winner)
+(bool isWinner, bool gameFinished) Checker()
 {
-    bool res = false;
-    winner = string.Empty;
+    (bool isWinner, bool gameFinished) res = (false, false);
     for (int i = 0; i < 3; i++)
     {
-        (res, winner) = (arr[0, i], arr[1, i], arr[2, i]) switch
+        switch (arr[0, i], arr[1, i], arr[2, i]) 
         {
-            ("X", "X", "X") => (true, "X"),
-            ("O", "O", "O") => (true, "O"),
-            _ => (res, winner)
+            case ('X', 'X', 'X'): return (true, true);
+            case ('O', 'O', 'O'): return (true, true);
         };
-        (res, winner) = (arr[i, 0], arr[i, 1], arr[i, 2]) switch
+        switch (arr[i, 0], arr[i, 1], arr[i, 2])
         {
-            ("X", "X", "X") => (true, "X"),
-            ("O", "O", "O") => (true, "X"),
-            _ => (res, winner)
+            case ('X', 'X', 'X'): return (true, true);
+            case ('O', 'O', 'O'): return (true, true);
         };
     }
 
     if (arr[0, 0] == arr[1, 1] && arr[1, 1] == arr[2, 2])
     {
-        res = true;
-        winner = arr[0, 0];
+        return (true, true);
     }
     if (arr[0, 2] == arr[1, 1] && arr[1, 1] == arr[2, 0])
     {
-        res = true;
-        winner = arr[0, 2];
+        return (true, true);
     }
 
-    return res || turn == 9;
+    return (false, turn == 9);
 }
 
 
 bool UpdateArr(int num)
 {
     int row = --num / 3, col = num % 3;
-    if (char.IsDigit(arr[row, col][0]))
+    if (char.IsDigit(arr[row, col]))
     {
-        arr[row, col] = curPlayer.ToString();
+        arr[row, col] = curPlayer.ToString()[0];
         return true;
     }
     return false;
@@ -120,10 +115,10 @@ ___|___|___
 
 void Initialize()
 {
-    arr = new string[,] {
-        { "1", "2", "3"},
-        { "4", "5", "6"},
-        { "7", "8", "9"}
+    arr = new char[,] {
+        { '1', '2', '3'},
+        { '4', '5', '6'},
+        { '7', '8', '9'}
     };
     curPlayer = Player.O;
     turn = 0;
