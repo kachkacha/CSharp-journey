@@ -1,0 +1,137 @@
+string[,] arr;
+Player curPlayer = Player.O;
+string message = string.Empty;
+int turn = 0;
+
+while (true)
+{
+newgame:
+    Initialize();
+    while (true)
+    {
+        Render();
+
+        if (Checker(out string winner))
+        {
+            string result = winner == string.Empty ? "It's A Tie" : $"We Have A Winner Player {(Player)((int)(curPlayer + 1) % 2)}";
+            Console.WriteLine($"\n{result}\nPress Enter To Restart");
+            Console.ReadLine();
+            goto newgame;
+        };
+
+
+        string choice = Console.ReadLine();
+
+        if (string.Equals(choice, "exit", StringComparison.OrdinalIgnoreCase)) goto endgame;
+
+        if (choice.Length == 1 && int.TryParse(choice, out int num))
+        {
+            if (!UpdateArr(num))
+            {
+                message = "Error: The cell is busy, pick something esle";
+                continue;
+            }
+        }
+        else
+        {
+            message = "Error: Wrong input";
+            continue;
+        }
+
+        turn++;
+        curPlayer = (Player)((int)(curPlayer + 1) % 2);
+    }
+    break;
+}
+
+endgame:
+
+
+
+
+
+
+
+
+
+bool Checker(out string winner)
+{
+    bool res = false;
+    winner = string.Empty;
+    for (int i = 0; i < 3; i++)
+    {
+        (res, winner) = (arr[0, i], arr[1, i], arr[2, i]) switch
+        {
+            ("X", "X", "X") => (true, "X"),
+            ("O", "O", "O") => (true, "O"),
+            _ => (res, winner)
+        };
+        (res, winner) = (arr[i, 0], arr[i, 1], arr[i, 2]) switch
+        {
+            ("X", "X", "X") => (true, "X"),
+            ("O", "O", "O") => (true, "X"),
+            _ => (res, winner)
+        };
+    }
+
+    if (arr[0, 0] == arr[1, 1] && arr[1, 1] == arr[2, 2])
+    {
+        res = true;
+        winner = arr[0, 0];
+    }
+    if (arr[0, 2] == arr[1, 1] && arr[1, 1] == arr[2, 0])
+    {
+        res = true;
+        winner = arr[0, 2];
+    }
+
+    return res || turn == 9;
+}
+
+
+bool UpdateArr(int num)
+{
+    int row = --num / 3, col = num % 3;
+    if (char.IsDigit(arr[row, col][0]))
+    {
+        arr[row, col] = curPlayer.ToString();
+        return true;
+    }
+    return false;
+}
+
+void Render()
+{
+    Console.Clear();
+    Console.WriteLine(
+$@"   |   |
+ {arr[0, 0]} | {arr[0, 1]} | {arr[0, 2]}
+___|___|___
+   |   |
+ {arr[1, 0]} | {arr[1, 1]} | {arr[1, 2]}
+___|___|___
+   |   |
+ {arr[2, 0]} | {arr[2, 1]} | {arr[2, 2]}
+   |   |");
+    Console.Write($"{message}\nPlayer {curPlayer}: Choose your field: ");
+    message = string.Empty;
+}
+
+
+void Initialize()
+{
+    arr = new string[,] {
+        { "1", "2", "3"},
+        { "4", "5", "6"},
+        { "7", "8", "9"}
+    };
+    curPlayer = Player.O;
+    turn = 0;
+}
+
+
+enum Player
+{
+    O,
+    X
+}
