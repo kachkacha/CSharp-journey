@@ -109,16 +109,17 @@ bool ArrUpdated(int num)
 void Render()
 {
     Console.Clear();
-    Console.WriteLine(
-$@"   |   |
- {arr[0, 0]} | {arr[0, 1]} | {arr[0, 2]}
-___|___|___
-   |   |
- {arr[1, 0]} | {arr[1, 1]} | {arr[1, 2]}
-___|___|___
-   |   |
- {arr[2, 0]} | {arr[2, 1]} | {arr[2, 2]}
-   |   |");
+    
+    Console.WriteLine($@"
+       |   |
+     {arr[0, 0]} | {arr[0, 1]} | {arr[0, 2]}
+    ___|___|___
+       |   |
+     {arr[1, 0]} | {arr[1, 1]} | {arr[1, 2]}
+    ___|___|___
+       |   |
+     {arr[2, 0]} | {arr[2, 1]} | {arr[2, 2]}
+       |   |"); 
     Console.Write($"{message}\nPlayer {curPlayer}: Choose your field: ");
     message = string.Empty;
 }
