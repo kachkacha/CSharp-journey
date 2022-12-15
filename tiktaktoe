@@ -3,46 +3,33 @@ Player curPlayer = Player.O;
 string message = string.Empty;
 int turn = 0;
 
-while (true)
-{
+
 newgame:
     Initialize();
     while (true)
     {
         Render();
-        var gameStatus = Checker();
-        if ( gameStatus.gameFinished )
+
+        if ( CheckForWinner(out bool winner) || turn == 9 )
         {
-            string result = gameStatus.isWinner ? "It's A Tie" : $"We Have A Winner Player {(Player)((int)(curPlayer + 1) % 2)}";
-            Console.WriteLine($"\n{result}\nPress Enter To Restart");
+            string result = winner ? $"We Have A Winner! Player {NextPlayer()}" : "It's A Tie";
+            Console.WriteLine($" Oops you can't because\n{result}\nPress Enter To Restart");
             Console.ReadLine();
             goto newgame;
         };
 
-
         string choice = Console.ReadLine();
 
-        if (string.Equals(choice, "exit", StringComparison.OrdinalIgnoreCase)) goto endgame;
-
-        if (choice.Length == 1 && int.TryParse(choice, out int num))
+        switch (CheckInput(choice))
         {
-            if (!UpdateArr(num))
-            {
-                message = "Error: The cell is busy, pick something esle";
-                continue;
-            }
-        }
-        else
-        {
-            message = "Error: Wrong input";
-            continue;
+            case InputResult.Error: continue;
+            case InputResult.Skip: goto newgame;
+            case InputResult.Endgame: goto endgame;
+            case InputResult.Valid: turn++; curPlayer = NextPlayer();
+            _: break;
         }
 
-        turn++;
-        curPlayer = (Player)((int)(curPlayer + 1) % 2);
     }
-    break;
-}
 
 endgame:
 
@@ -50,41 +37,65 @@ endgame:
 
 
 
+Player NextPlayer() => (Player)((int)(curPlayer + 1) % 2);
 
-
-
-
-(bool isWinner, bool gameFinished) Checker()
+InputResult CheckInput(string choice)
 {
-    (bool isWinner, bool gameFinished) res = (false, false);
+
+    switch (choice.ToLower()) {
+        case "exit": return InputResult.Endgame;
+        case "skip": return InputResult.Skip;
+    }
+
+    if (choice.Length == 1 && int.TryParse(choice, out int num))
+    {
+        if (ArrUpdated(num))
+        {
+            return InputResult.Valid;
+        }
+        else
+        {
+            message = "Error: The cell is busy, pick something esle";
+            return InputResult.Error;
+        }
+    }
+
+    message = "Error: Wrong input";
+    return InputResult.Error;
+
+}
+
+bool CheckForWinner(out bool winner)
+{
+    winner = false;
     for (int i = 0; i < 3; i++)
     {
         switch (arr[0, i], arr[1, i], arr[2, i]) 
         {
-            case ('X', 'X', 'X'): return (true, true);
-            case ('O', 'O', 'O'): return (true, true);
+            case ('X', 'X', 'X'): winner = true; return true;
+            case ('O', 'O', 'O'): winner = true; return true;
         };
         switch (arr[i, 0], arr[i, 1], arr[i, 2])
         {
-            case ('X', 'X', 'X'): return (true, true);
-            case ('O', 'O', 'O'): return (true, true);
+            case ('X', 'X', 'X'): winner = true; return true;
+            case ('O', 'O', 'O'): winner = true; return true;
         };
     }
 
     if (arr[0, 0] == arr[1, 1] && arr[1, 1] == arr[2, 2])
     {
-        return (true, true);
+        winner = true; return true;
     }
     if (arr[0, 2] == arr[1, 1] && arr[1, 1] == arr[2, 0])
     {
-        return (true, true);
+        winner = true; return true;
     }
 
-    return (false, turn == 9);
+    return false;
 }
 
 
-bool UpdateArr(int num)
+bool ArrUpdated(int num)
 {
     int row = --num / 3, col = num % 3;
     if (char.IsDigit(arr[row, col]))
@@ -129,4 +140,12 @@ enum Player
 {
     O,
     X
+}
+
+enum InputResult
+{
+    Error,
+    Valid,
+    Skip,
+    Endgame
 }
