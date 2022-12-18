@@ -1,0 +1,152 @@
+char[,] arr;
+Player curPlayer = Player.O;
+string message = string.Empty;
+int turn = 0;
+
+
+newgame:
+    Initialize();
+    while (true)
+    {
+        Render();
+
+        if ( CheckForWinner(out bool winner) || turn == 9 )
+        {
+            string result = winner ? $"We Have A Winner! Player {NextPlayer()}" : "It's A Tie";
+            Console.WriteLine($" Oops you can't because\n{result}\nPress Enter To Restart");
+            Console.ReadLine();
+            goto newgame;
+        };
+
+        string choice = Console.ReadLine();
+
+        switch (CheckInput(choice))
+        {
+            case InputResult.Error: continue;
+            case InputResult.Skip: goto newgame;
+            case InputResult.Endgame: goto endgame;
+            case InputResult.Valid: turn++; curPlayer = NextPlayer();
+            _: break;
+        }
+
+    }
+
+endgame:
+
+
+
+
+
+Player NextPlayer() => (Player)((int)(curPlayer + 1) % 2);
+
+InputResult CheckInput(string choice)
+{
+
+    switch (choice.ToLower()) {
+        case "exit": return InputResult.Endgame;
+        case "skip": return InputResult.Skip;
+    }
+
+    if (choice.Length == 1 && int.TryParse(choice, out int num))
+    {
+        if (ArrUpdated(num))
+        {
+            return InputResult.Valid;
+        }
+        else
+        {
+            message = "Error: The cell is busy, pick something esle";
+            return InputResult.Error;
+        }
+    }
+
+    message = "Error: Wrong input";
+    return InputResult.Error;
+
+}
+
+bool CheckForWinner(out bool winner)
+{
+    winner = false;
+    for (int i = 0; i < 3; i++)
+    {
+        switch (arr[0, i], arr[1, i], arr[2, i]) 
+        {
+            case ('X', 'X', 'X'): winner = true; return true;
+            case ('O', 'O', 'O'): winner = true; return true;
+        };
+        switch (arr[i, 0], arr[i, 1], arr[i, 2])
+        {
+            case ('X', 'X', 'X'): winner = true; return true;
+            case ('O', 'O', 'O'): winner = true; return true;
+        };
+    }
+
+    if (arr[0, 0] == arr[1, 1] && arr[1, 1] == arr[2, 2])
+    {
+        winner = true; return true;
+    }
+    if (arr[0, 2] == arr[1, 1] && arr[1, 1] == arr[2, 0])
+    {
+        winner = true; return true;
+    }
+
+    return false;
+}
+
+
+bool ArrUpdated(int num)
+{
+    int row = --num / 3, col = num % 3;
+    if (char.IsDigit(arr[row, col]))
+    {
+        arr[row, col] = curPlayer.ToString()[0];
+        return true;
+    }
+    return false;
+}
+
+void Render()
+{
+    Console.Clear();
+    
+    Console.WriteLine($@"
+       |   |
+     {arr[0, 0]} | {arr[0, 1]} | {arr[0, 2]}
+    ___|___|___
+       |   |
+     {arr[1, 0]} | {arr[1, 1]} | {arr[1, 2]}
+    ___|___|___
+       |   |
+     {arr[2, 0]} | {arr[2, 1]} | {arr[2, 2]}
+       |   |"); 
+    Console.Write($"{message}\nPlayer {curPlayer}: Choose your field: ");
+    message = string.Empty;
+}
+
+
+void Initialize()
+{
+    arr = new char[,] {
+        { '1', '2', '3'},
+        { '4', '5', '6'},
+        { '7', '8', '9'}
+    };
+    curPlayer = Player.O;
+    turn = 0;
+}
+
+
+enum Player
+{
+    O,
+    X
+}
+
+enum InputResult
+{
+    Error,
+    Valid,
+    Skip,
+    Endgame
+}

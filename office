@@ -1,157 +1,147 @@
-using ConsoleApp1;
-using System.Diagnostics;
-using System.Text;
-using static ConsoleApp1.Chapter4;
-
-Members member = new();
-member.Introduction(true);
-member = new();
-Console.ReadLine();
-Console.WriteLine("ai");
-Console.ReadLine();
-
-
-
-class Members
-{
-
-    // member - private fields
-    private string name;
-    private string jobTitle;
-    private int age;
-    private double salary;
-    // member - public fields
-
-    public int count;
-
-    // member - properties exposes field safely - start with capital letter
-    public string Name
-    {
-        get { return name; }
-        set 
+public void MethodJuggedArray()
         {
-            name = value;
-        }
-    }
+            // jagged array
+            int[][] juggedArray = new int[3][];
+
+            juggedArray[0] = new int[5];
+            juggedArray[1] = new int[7];
+            juggedArray[2] = new int[1];
+
+            juggedArray[0] = new int[] { 1, 2, 3, 4 };
+            juggedArray[0] = new int[] { 0, 3, 8, 5 };
+            juggedArray[0] = new int[] { 7, 34, 2, 7 };
 
 
-    // public member method can be call from other classes
-    public void Introduction(bool isFriend)
-    {
-        Console.WriteLine($"hi i am {name} i am {age} years old, i'm {jobTitle}");
-        if (isFriend)
-        {
-            sharePrivateInfo();
-        }
-    }
-
-    // private member method can be called from inside the class only
-    private void sharePrivateInfo()
-    {
-        Console.WriteLine($"my salary is {salary}");
-    }
-
-
-    // member constructor
-    public Members()
-    {
-        name = "luffy";
-        age = 17;
-        jobTitle = "pirate";
-        salary = 1_500_000_000;
-    }
-
-
-    // entry is created in the finalizing queue when finalizers are called
-    // garbage collector invokes the process on that queue
-
-    // member - finalizer - destructor
-    ~Members()
-    {
-        // cleanup statements
-        Console.WriteLine("Object is gone");
-        Debug.Write("debug diagnostic");
-    }
-
-
-}
-
-
-
-
-class Box
-{
-    //member fields
-    private int length = 3;
-    public int height;
-    private int width;
-    private int volume;
-
-    public int FrontSurace
-    {
-        get
-        {
-            return this.length * this.height;
-        }
-    }
-
-
-    public int Width { get; set; }
-    public int Volume
-    {
-        get
-        {
-            return this.length * this.height * this.width;
-        }
-    }
-
-    public int Height 
-    {
-        get { return height; }
-        set
-        { 
-            if (value < 0)
+            // alternative way 
+            int[][] juggedArray2 = new int[][]
             {
-                value -= 1;
+                    new int[] { 1, 2},
+                    new int[] { 3, 4, 5, 6 }
+            };
+
+            // we can omit new int[][]
+            int[][] juggedArray3 =
+            {
+                    new int[] { 1, 2, 3},
+                    new int[] { 3, 4, 5, 6 }
+                };
+
+            //Console.WriteLine($"middle in first row : {juggedArray3[0][1]}");
+
+            foreach (var item in juggedArray3)
+            {
+                foreach (var item2 in item)
+                {
+                    Console.WriteLine(item2);
+                }
             }
-            height = value;
+
         }
-    }
 
-    public Box(int length, int height, int width)
-    {
-        this.length = length;
-        Height = height;
-        this.width = width; 
-    }
-
-
-
-    // setter method
-    public void SetLength(int length)
-    {
-        if ( length < 0 )
+        public void JuggedArrayChellenge()
         {
-            throw new ArgumentException("Length should be non negative");
+            string[][] familyMembers = new string[3][]
+            {
+                new string[] { "gio", "mari" },
+                new string[] { "ilia", "tilda" },
+                new string[] { "gaga", "gugu" }
+            };
+
+            for (int i = 0; i < familyMembers.Length; i++)
+            {
+                Console.WriteLine("this is my family");
+                for (int j = 0; j < familyMembers[i].Length; j++)
+                {
+                    Console.WriteLine($"hello my name is {familyMembers[i][j]}");
+                }
+            }
+
         }
-        this.length = length;
-    }
 
-    // getter method
-    public int GetLength() { 
-        return this.length; 
-    }
+        public void ArraysAsParameters()
+        {
+            //int[] grades = { 1, 2, 3, 4, 5 };
+            //double average = GetAverage(grades);
 
-    public int GetVolume()
-    {
-        return this.length * this.height * this.width;
-    }
+            //Console.WriteLine(average);
 
-    public void DisplayInfo()
-    {
-        Console.WriteLine($"length - {length}; height - {Height}; width - {this.width}; volume - {Volume}");
-    }
+            int[] happiness = new int[] { 1, 2, 3, 4, 5 };
 
-}
+            SunIsShinning(happiness);
+
+            foreach (var item in happiness)
+            {
+                Console.Write($"{item} ");
+            }
+        }
+
+        public void SunIsShinning(int[] arr)
+        {
+            for (int i = 0; i < arr.Length; i++)
+            {
+                arr[i] += 2;
+            }
+        }
+
+        public double GetAverage(int[] gradesArray)
+        {
+            int sum = 0;
+
+            foreach (var grade in gradesArray)
+            {
+                sum += grade;
+            }
+
+            double average = (double)sum / gradesArray.Length;
+            return average;
+            
+            //return (double)gradesArray.Sum() / gradesArray.Length;
+
+            //return gradesArray.Average();
+        }
 
 
+        public int minv2(params int[] numbers)
+        {
+            int min = int.MaxValue;
+            foreach (var item in numbers)
+            {
+                min = Math.Min(min, item);
+            }
+            return min;
+        }
+
+        public void ArraylistMethod()
+        {
+            ArrayList list = new ArrayList();
+            ArrayList list1 = new ArrayList(100);
+
+            list.Add(2);
+            list.Add("hi");
+            list.Add(23.4);
+            list.Add(5L);
+            list.Add(2);
+
+            // removes with value 2 only first occurance
+            list.Remove(2);
+
+            // remove at index
+            //list.RemoveAt(0);
+
+            // list size
+            int count = list.Capacity;
+
+            double sum = 0;
+
+            foreach (var v in list)
+            {
+                if (v is int || v is double)
+                {
+                    sum += Convert.ToDouble(v);
+                }
+                else if (v is string)
+                {
+                    Console.WriteLine(v);
+                }
+            }
+        }
