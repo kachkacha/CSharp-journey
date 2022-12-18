@@ -371,5 +371,224 @@ namespace Leetcode
             InorderTraversalHelper(root.right, list);
         }
 
+        //https://leetcode.com/problems/remove-one-element-to-make-the-array-strictly-increasing/
+        public bool CanBeIncreasing(int[] nums)
+        {
+            bool remove = false;
+
+            for (int i = 1; i < nums.Length; i++)
+            {
+                if (nums[i] <= nums[i - 1])
+                {
+                    if (remove || i != 1 && nums[i] <= nums[i - 2] && i != nums.Length - 1 && nums[i + 1] <= nums[i - 1])
+                    {
+                        return false;
+                    }
+                    remove = true;
+                }
+            }
+            return true;
+        }
+
+        //https://leetcode.com/problems/x-of-a-kind-in-a-deck-of-cards/
+        public bool HasGroupsSizeX(int[] deck)
+        {
+            Dictionary<int, int> nums = new();
+            foreach (var item in deck)
+            {
+                if (nums.ContainsKey(item))
+                {
+                    nums[item] = nums[item] + 1;
+                }
+                else
+                {
+                    nums[item] = 1;
+                }
+            }
+            int num = nums[deck[0]];
+            foreach (var item in nums)
+            {
+                if (GCD(num, item.Value) == 1)
+                {
+                    return false;
+                }
+            }
+
+
+
+            return true;
+        }
+
+        int GCD(int a, int b)
+        {
+            int Remainder;
+
+            while (b != 0)
+            {
+                Remainder = a % b;
+                a = b;
+                b = Remainder;
+            }
+
+            return a;
+        }
+
+
+        //https://leetcode.com/problems/third-maximum-number/
+        public int ThirdMax(int[] nums)
+        {
+            long max3 = long.MinValue, max2 = long.MinValue, max1 = long.MinValue;
+            
+            foreach (var item in nums)
+            {
+                if (item > max3 && item != max3 && item != max2 && item != max1)
+                {
+                    if (item > max2)
+                    {
+                        if (item > max1)
+                        {
+                            max3 = max2;
+                            max2 = max1;
+                            max1 = item;
+                        }
+                        else
+                        {
+                            max3 = max2;
+                            max2 = item;
+                        }
+                    }
+                    else
+                    {
+                        max3 = item;
+                    }
+                }
+            }
+
+            return (int)(max3 == long.MinValue ? max1 : max3);
+        }
+
+
+        //https://leetcode.com/problems/can-place-flowers/
+        public bool CanPlaceFlowers(int[] flowerbed, int n) {
+            int cur = 0;
+
+            foreach (var item in flowerbed) {
+                if (item == 0) {
+                    if (cur == 2) {
+                        cur--;
+                        n--;
+                    } else {
+                        cur++;
+                    }
+                } else {
+                    cur = 0;
+                }
+                if (n == 0) return true;
+            }
+
+            return false || (n == 1 && cur == 2);
+        }
+
+
+        //https://leetcode.com/problems/valid-mountain-array/
+        public bool ValidMountainArray(int[] arr) {
+            if (arr.Length < 3) return false;
+            bool increase = true;
+
+            for (int i = 1; i < arr.Length; i++) {
+                if (increase) {
+                    if (arr[i] < arr[i - 1]) {
+                        if (i == 1) return false;
+                        increase = !increase;
+                    } else if (arr[i] == arr[i - 1]) {
+                        return false;
+                    }
+                } else {
+                    if (arr[i] >= arr[i - 1]) {
+                        return false;
+                    }
+                }
+            }
+
+            return !increase;
+        }
+
+
+        //https://leetcode.com/problems/check-if-n-and-its-double-exist/
+        public bool CheckIfExist(int[] arr)
+        {
+            HashSet<int> ints = new(arr);
+            int zeros = 0;
+            foreach (var item in arr)
+            {
+                ints.Remove(item);
+                if (ints.Contains(2 * item))
+                {
+                    return true;
+                }
+                if (item == 0 && ++zeros == 2)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+
+        //https://leetcode.com/problems/valid-boomerang/
+        public bool IsBoomerang(int[][] points) {
+            (int x, int y) a = (points[0][0], points[0][1]);
+            (int x, int y) b = (points[1][0], points[1][1]);
+            (int x, int y) c = (points[2][0], points[2][1]);
+
+            if (a == b || b == c || a == c) return false;
+
+            if ((b.y - a.y == 0) || (c.y - a.y == 0)) {
+                if (b.y == c.y) return false;
+                else return true;
+            }
+
+            if ((b.x - a.x == 0) || (c.x - a.x == 0)) {
+                if (b.x == c.x) return false;
+                else return true;
+            }
+
+            if ((double)(b.x - a.x) / (b.y - a.y) == (double)(c.x - a.x) / (c.y - a.y)) return false;
+            return true;
+        }
+
+
+        //https://leetcode.com/problems/longest-palindromic-substring/
+        public string LongestPalindrome(string s) {
+            (int f, int l) res = (0, 1);
+            int[,] arr = new int[s.Length, 2];
+            arr[0, 1]++;
+
+            for (int i = 1; i < s.Length; i++) {
+                arr[i, 1]++;
+                if (s[i] == s[i - 1]) {
+                    arr[i - 1, 0] = 2;
+                    if (res.l < 2) {
+                        res.f = i - 1;
+                        res.l = 2;
+                    }
+                }
+                for (int j = i - 1; j > 0; j--) {
+                    int k = (i - j) % 2;
+                    if (arr[j, k] > 0 && s[j - 1] == s[i]) {
+                        arr[j - 1, k] = arr[j, k] + 2;
+                        arr[j, k] = 0;
+                        if (arr[j - 1, k] > res.l) {
+                            res.f = j - 1;
+                            res.l = arr[j - 1, k];
+                        }
+                    }
+                }
+            }
+
+            return s.Substring(res.f, res.l);
+        }
+
+
     }
 }

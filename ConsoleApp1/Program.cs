@@ -6,9 +6,24 @@ using static ConsoleApp1.Chapter4;
 
 var v = new Class2(new Class1("const init"));
 Console.WriteLine(v.i);
+car c = new("", 5, "");
+car a = c with { };
+Console.WriteLine($"{a == c} {ReferenceEquals(a, c)}");
 
 
 
+
+record struct st
+{
+    public int i { get; init; }
+
+    public void opa()
+    {
+        Console.WriteLine();
+    }
+}
+
+record car (string make, int model, string color);
 
 
 class Class1
