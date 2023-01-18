@@ -55,4 +55,79 @@ where c.country not in (
 order by c.country
 
 
+5
+--------------------------------------------
+select
+  o.custid,
+  o.orderid,
+  o.orderdate,
+  o.empid
+from Sales.Orders o
+where o.orderdadte = (
+    select max(orderdate)
+    from Sales.Orders o1
+    where o1.custid = o.custid
+  )
+
+6
+--------------------------------------------
+select
+  c.custid,
+  c.company
+from Sales.Customer c
+where exists (
+    select count(*)
+    from Sales.Orders o
+    where
+      c.custid = o.custid
+      and year(o.orderdate) = 2015
+  )
+  and not exist (
+    select count(*)
+    from Sales.Orders o
+    where
+      c.custid = o.custid
+      and year(o.orderdate) = 2016
+  )
+  
+  7
+  ------------------------------------------
+ select
+  c.custid,
+  c.company
+from Sales.Customer c
+where c.custid in (
+    select o.custid
+    from Sales.Orders o
+    where
+      o.custid is not null
+      and exist (
+        select od.orderid
+        from Sales.OrderDetails od
+        where od.orderid = o.orderid and od.productid = 12
+      )
+  )
+  
+  10
+  --------------------------------------------
+ select
+  o.custid,
+  o.orderdate,
+  o.orderid,
+  datediff(
+    day,
+    (
+      select top(1) o1.orderdate
+      from Sales.Orders o1
+      where
+        o.custid = o1.custid
+        and o1.orderdate < o.orderdate
+      order by
+        o1.orderdate desc
+    ),
+    o.orderdate
+  ) as diff
+from Sales.Orders o
+  
+
 
