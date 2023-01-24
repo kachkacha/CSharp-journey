@@ -121,9 +121,9 @@ where c.custid in (
       from Sales.Orders o1
       where
         o.custid = o1.custid
-        and o1.orderdate < o.orderdate
+        and o1.orderdate <= o.orderdate
       order by
-        o1.orderdate desc
+        o1.orderdate desc, o1.orderid
     ),
     o.orderdate
   ) as diff
