@@ -58,5 +58,6 @@ select
 from Sales.Customers c
 left outer join (select * from Sales.Orders where orderdate = '20160212') o
 on c.custid = o.custid
-order by c.custid;
+order by c.custid;
+
 
