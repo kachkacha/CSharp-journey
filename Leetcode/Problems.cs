@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.ConstrainedExecution;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -20,6 +22,33 @@ namespace Leetcode
                 this.right = right;
             }
         }
+
+        public class ListNode {
+            public int val;
+            public ListNode next;
+            public ListNode(int val = 0, ListNode next = null) {
+                this.val = val;
+                this.next = next;
+            }
+        }
+
+        public ListNode MergeNodes(ListNode head) {
+            ListNode result = new ListNode();
+            ListNode cur = result;
+            int sum = 0;
+            while ((head = head.next) is not null) {
+                sum += head.val;
+                if (head.val == 0) {
+                    cur.val = sum;
+                    cur.next = new ListNode();
+                    cur = cur.next;
+                    sum = 0;
+                }
+            }
+            cur.next = null;
+            return result;
+        }
+
 
         //https://leetcode.com/problems/container-with-most-water/
         public int MaxArea(int[] height)
@@ -559,36 +588,580 @@ namespace Leetcode
 
 
         //https://leetcode.com/problems/longest-palindromic-substring/
+        // does not work yet
         public string LongestPalindrome(string s) {
             (int f, int l) res = (0, 1);
-            int[,] arr = new int[s.Length, 2];
-            arr[0, 1]++;
+            List<int> list = new();
+            list.Add(0);
 
             for (int i = 1; i < s.Length; i++) {
-                arr[i, 1]++;
-                if (s[i] == s[i - 1]) {
-                    arr[i - 1, 0] = 2;
-                    if (res.l < 2) {
-                        res.f = i - 1;
-                        res.l = 2;
+                for (int j = 0; j < list.Count; j++) {
+                    if (list[j] != 0 && s[i] == s[list[j] - 1]) {
+                        list[j]--;
+                        continue;
                     }
+                    if (res.l < i - list[j]) {
+                        res.f = list[j];
+                        res.l = i - list[j];
+                    }
+                    list.RemoveAt(j--);
                 }
-                for (int j = i - 1; j > 0; j--) {
-                    int k = (i - j) % 2;
-                    if (arr[j, k] > 0 && s[j - 1] == s[i]) {
-                        arr[j - 1, k] = arr[j, k] + 2;
-                        arr[j, k] = 0;
-                        if (arr[j - 1, k] > res.l) {
-                            res.f = j - 1;
-                            res.l = arr[j - 1, k];
-                        }
-                    }
+                list.Add(i);
+                if (s[i] == s[i - 1]) {
+                    list.Add(i - 1);
+                }
+            }
+
+            foreach (var item in list) {
+                if (res.l < s.Length - item) {
+                    res.f = item;
+                    res.l = s.Length - item;
                 }
             }
 
             return s.Substring(res.f, res.l);
         }
 
+        //https://leetcode.com/problems/next-permutation/
+        public void NextPermutation(int[] nums) {
+            int i = nums.Length - 2, tmp = 0;
+            for (; i >= 0; i--) {
+                if (nums[i] < nums[i + 1]) {
+                    for (int j = nums.Length - 1; true; j--) {
+                        if (nums[i] < nums[j]) {
+                            tmp = nums[i];
+                            nums[i] = nums[j];
+                            nums[j] = tmp;
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+
+            Array.Sort(nums, i + 1, nums.Length - i - 1);
+        }
+
+        //
+        public IList<IList<int>> PermuteUnique(int[] nums) {
+            var res = new List<IList<int>>();
+            PermuteUniqueHelper(new List<int>(nums), res, new List<int>());
+            return res;
+        }
+
+        public void PermuteUniqueHelper(List<int> numbers, List<IList<int>> lists, List<int> cur) {
+            if (numbers.Count == 0) {
+                lists.Add(new List<int>(cur));
+                return;
+            }
+            var set = new HashSet<int>();
+            for (int i = 0; i < numbers.Count; i++) {
+                int removed = numbers.ElementAt(i);
+                if (set.Contains(removed)) {
+                    continue;
+                }
+                set.Add(removed);
+                numbers.RemoveAt(i);
+                cur.Add(removed);
+                PermuteUniqueHelper(numbers, lists, cur);
+                numbers.Insert(i, removed);
+                cur.RemoveAt(cur.Count - 1);
+            }
+        }
+
+
+        public int[] CountBits(int n) {
+            int[] arr = new int[n + 1];
+            arr[0] = 0;
+            if (n == 0) {
+                return arr;
+            }
+            arr[1] = 1;
+            int i = 1, j = 2, k = 0;
+            Loop:
+            for (k = j / 2; i < j && i < arr.Length; i++) {
+                arr[i] = arr[k] + arr[i - k];
+            }
+            if (i < arr.Length) {
+                j = i * 2;
+                arr[i++]++;
+                goto Loop;
+            }
+            return arr;
+        }
+
+        public double FindMedianSortedArrays(int[] nums1, int[] nums2) {
+            var arr = nums1.Concat(nums2).ToArray();
+            Array.Sort(arr);
+            if (arr.Length % 2 == 0)
+                return (arr[arr.Length / 2] + arr[arr.Length / 2 - 1]) / 2.0;
+            return arr[arr.Length / 2];
+        }
+
+
+        // write this
+        public bool IsMatch(string s, string p) {
+            List<(char ch, int count)> lists = new(new (char, int)[] { (s[0], 0) });
+            List<string> listp = new();
+            List<char> zeroormore = new();
+
+            foreach (var item in s) {
+                if (lists[^1].ch == item) lists[^1] = (lists[^1].ch, lists[^1].count + 1);
+                else lists.Add((item, 1));
+            }
+
+            foreach (var item in p) {
+                if (listp.Count > 0 && listp[^1][^1] == item) listp[listp.Count - 1] += item;
+                else if (item == '*') {
+                    if (listp[^1].Length != 1) {
+                        listp[listp.Count - 1] = listp[^1].Substring(0, listp[^1].Length - 1);
+                        listp.Add(listp[^1][^1].ToString());
+                    }
+                    listp[listp.Count - 1] += item;
+                } else {
+                    listp.Add(item.ToString());
+                }
+            }
+
+            for(int i = 0; i < listp.Count; i++) {
+                if (listp[i].Contains('*')) {
+                    zeroormore.Add(listp[i][0]);
+                } else {
+                    if (lists.Count == 0) return false;
+                    if (lists[0].ch == listp[i][0] || listp[i][0] == '.') {
+                        if (lists[0].count == listp[i].Length) {
+                            lists.RemoveAt(0);
+                            continue;
+                        }
+                        if (lists[0].count < listp[i].Length) {
+                            listp[i] = new string(Enumerable.Repeat(listp[i][0], listp[i].Length - lists[0].count).ToArray());
+                            lists.RemoveAt(0);
+                            i--;
+                        } else {
+                            lists[0] = (lists[0].ch, lists[0].count - listp[i].Length);
+                        }
+                    } else {
+                        int index = zeroormore.FindIndex(x => x == lists[0].ch || x == '.');
+                        if (index == -1) return false;
+                        zeroormore.RemoveRange(0, index + 1);
+                        lists.RemoveAt(0);
+                        i--;
+                    }
+                }
+            }
+
+            foreach (var item in zeroormore) {
+                if (lists.Count == 0) break;
+                if (item == '.') return true;
+                if (item == lists[0].ch) {
+                    lists.RemoveAt(0);
+                }
+            }
+
+            return lists.Count == 0;
+        }
+
+        public bool IsStrictlyPalindromic(int n) {
+            return Enumerable.Range(2, n - 2).Select(x => new string(System.Convert.ToString(n, x).Skip('0').ToArray())).ToList().All(s => IsPalindrom(s));
+            
+            bool IsPalindrom(string s) {
+                for (int i = 0; i < s.Length / 2; i++)
+                    if (s[i] != s[s.Length - i - 1])
+                        return false;
+                return true;
+            }
+            
+        }
+
+        public int DeepestLeavesSum(TreeNode root) {
+            Dictionary<int, List<int>> dict = new();
+            int max = 0;
+            maxHeight(root, 0, ref max, dict);
+            return dict[max].Sum();
+
+            void maxHeight(TreeNode root, int cur, ref int max, Dictionary<int, List<int>> dict) {
+                if (root is null) return;
+                if (cur > max) {
+                    max = cur;
+                }
+                if (cur == max) {
+                    if (!dict.ContainsKey(max)) {
+                        dict.Add(max, new List<int>());
+                    }
+                    dict[max].Add(root.val);
+                }
+                maxHeight(root.left, cur + 1, ref max, dict);
+                maxHeight(root.right, cur + 1, ref max, dict);
+            }
+        }
+
+
+        public class SubrectangleQueries {
+
+            int[][] rectangle;
+
+            public SubrectangleQueries(int[][] rectangle) => this.rectangle = rectangle;
+
+            public void UpdateSubrectangle(int row1, int col1, int row2, int col2, int newValue) {
+                for (int r = row1; r <= row2; r++) {
+                    for (int c = col1; c <= col2; c++) {
+                        rectangle[r][c] = newValue;
+                    }
+                }
+            }
+
+            public int GetValue(int row, int col) => rectangle[row][col];
+        }
+
+        public int[] TwoSum(int[] nums, int target) {
+            Dictionary<int, int> dict = new();
+            for (int i = 0; i < nums.Length; i++) {
+                if (dict.ContainsKey(target - nums[i]))
+                    return new int[] { dict[target - nums[i]], i };
+                if (!dict.ContainsKey(nums[i]))
+                    dict.Add(nums[i], i);
+            }
+            return null;
+        }
+
+        public int[] TwoSumII(int[] nums, int target) {
+            int l = 0, r = nums.Length - 1;
+            while (l < r) {
+                int sum = nums[l] + nums[r];
+                if (sum == target)
+                    return new int[] { l + 1, r + 1 };
+                if (sum < target)
+                    l++;
+                else r--;
+            }
+            return null;
+        }
+
+        public bool CheckSubarraySum(int[] nums, int k) {
+            Dictionary<int, List<int>> dict = new();
+            int sumTillIndex = 0;
+            dict.Add(0, new List<int>(new int[] { -1 }));
+
+            for (int i = 0; i < nums.Length; i++) {
+
+                sumTillIndex += nums[i];
+
+                dict.TryAdd(sumTillIndex, new List<int>());
+                dict[sumTillIndex].Add(i);
+
+                if (dict.Any(x => (sumTillIndex - x.Key) % k == 0 && i - x.Value[0] > 1))
+                    return true;
+
+            }
+
+            return false;
+        }
+
+        public int SubarraySum(int[] nums, int k) {
+            Dictionary<int, int> dict = new();
+            int sumTillIndex = 0, count = 0;
+
+            dict.Add(0, 1);
+
+            for (int i = 0; i < nums.Length; i++) {
+
+                sumTillIndex += nums[i];
+
+                if (dict.ContainsKey(sumTillIndex - k))
+                    count += dict[sumTillIndex - k];
+
+                dict[sumTillIndex] = dict.GetValueOrDefault(sumTillIndex) + 1;
+            }
+
+            return count;
+        }
+
+        public IList<IList<int>> ThreeSum(int[] nums) {
+            Array.Sort(nums);
+            List<IList<int>> list = new();
+            int tmp;
+
+            for(int i = 0; i < nums.Length - 2;) {
+                if (nums[i] > 0) break;
+                int l = i + 1, r = nums.Length - 1;
+                while (l < r) {
+                    int sum = nums[i] + nums[l] + nums[r];
+                    if (sum == 0) {
+                        list.Add(new int[] { nums[i], nums[l], nums[r] });
+                    }
+                    if (sum <= 0) {
+                        tmp = l;
+                        while (++l < r && nums[tmp] == nums[l]) ;
+                    } else {
+                        tmp = r;
+                        while (l < --r && nums[tmp] == nums[r]) ;
+                    }
+                }
+                tmp = i;
+                while (++i < nums.Length - 2 && nums[tmp] == nums[i]) ;
+            }
+
+            return list;
+        }
+
+        public IList<IList<int>> FourSum(int[] nums, int target) {
+            Array.Sort(nums);
+            HashSet<(int, int, int, int)> list = new();
+            for (int i = 0; i < nums.Length - 4; i++) {
+                for (int j = i + 1; j < nums.Length - 3; j++) {
+                    int l = j + 1, r = nums.Length - 1, sum2 = nums[i] + nums[j];
+                    //if (sum2 > 0 && target > 0 && sum2 > target / 2) return list;
+                    while (l < r) {
+                        int sum = sum2 + nums[l] + nums[r];
+                        if (sum == target) {
+                            list.Add((nums[i], nums[j], nums[l++], nums[r]));
+                        } else if (sum <= target) {
+                            l++;
+                        } else {
+                            r--;
+                        }
+                    }
+                }
+            }
+            return list.Select(x => new int[] {x.Item1, x.Item2, x.Item3, x.Item4}).ToList<IList<int>>();
+        }
+
+        public bool CanBeValid(string s, string locked) {
+            if (s.Length % 2 == 1)
+                return false;
+            int open = 0, canopen = 0, canclose = 0;
+
+            for (int i = 0; i < s.Length; i++) {
+                if (s[i] == '(')
+                    open++;
+                else {
+                    open--;
+                    if (open / 2 < canclose)
+                        canclose--;
+                }
+
+                if (locked[i] == '0') {
+                    if (s[i] == ')')
+                        canopen++;
+                    else if (canclose + 1 <= open / 2)
+                        canclose++;
+                }
+
+                if (open < 0) {
+                    if (canopen > 0) {
+                        open += 2;
+                        canopen--;
+                    } else
+                        return false;
+                }
+
+            }
+
+            return open == 0 || canclose >= open / 2;
+        }
+
+        public bool CheckValidString(string s) {
+
+            int min = 0, max = 0;
+
+            for (int i = 0; i < s.Length; i++) {
+                max += s[i] != ')' ? 1 : -1;
+                min += s[i] == '(' ? 1 : min ==  0 ? 0 : -1;
+                if (max < 0)
+                    return false;
+
+            }
+
+            return min == 0;
+        }
+
+        public int LongestValidParentheses(string s) {
+            if (s.Length == 0) return 0;
+            int open = 0;
+            int[] arr = new int[s.Length + 1];
+
+            for (int i = 0, j = 1; i < s.Length; i++, j++) {
+                if (s[i] == '(') {
+                    open++;
+                } else if (open > 0) {
+                    open--;
+                    arr[j] = arr[i] + 1;
+                    int lastclose = j - 2 * arr[j];
+                    arr[j] += arr[lastclose];
+                }
+            }
+
+            return 2 * arr.Max();
+        }
+
+        public int[] SearchRange1(int[] nums, int target) {
+            (int l, int m, int r, int d, bool f) tmp = (0, 0, nums.Length - 1, 0, false);
+
+            int index = bsearch(() => {
+                if (tmp.d < 0) tmp.l = tmp.m + 1;
+                else if (tmp.d > 0) tmp.r = tmp.m - 1;
+                else tmp.f = true;
+            });
+
+            tmp = (0, tmp.m, index, 0, false);
+            int li = bsearch(() => {
+                if (tmp.d < 0) tmp.l = tmp.m + 1;
+                else if (tmp.m == 0 || nums[tmp.m - 1] < target) tmp.f = true;
+                else tmp.r = tmp.m - 1;
+            });
+
+            tmp = (index == -1 ? nums.Length : index, tmp.m, nums.Length - 1, 0, false);
+            int ri = bsearch(() => {
+                if (tmp.d > 0) tmp.r = tmp.m - 1;
+                else if (tmp.m == nums.Length - 1 || nums[tmp.m + 1] > target) tmp.f = true;
+                else tmp.l = tmp.m + 1;
+            });
+
+            return new int[] { li, ri };
+
+            int bsearch(Action action) {
+                if (tmp.l > tmp.r) return -1;
+                tmp.m = (tmp.l + tmp.r) / 2;
+                tmp.d = nums[tmp.m] - target;
+                action();
+                return tmp.f ? tmp.m : bsearch(action);
+            }
+        }
+
+        public int CoinChange(int[] coins, int amount) {
+            Array.Sort(coins);
+            return helper(coins.Length - 1, 0, 0);
+
+            int helper(int i, int curamount, int coincount) {
+                if (curamount == amount) {
+                    return coincount;
+                }
+
+                if (i < 0) {
+                    return -1;
+                }
+
+                int amountgoal = amount - curamount;
+                int res = int.MaxValue;
+                int curcoincount = amountgoal / coins[i];
+                while (curcoincount > -1) {
+                    int helperres = helper(i - 1, curamount + curcoincount * coins[i], coincount + curcoincount);
+                    if (helperres != -1) {
+                        res = Math.Min(res, helperres);
+                    }
+                    curcoincount--;
+                }
+
+                return res == int.MaxValue ? -1 : res;
+            }
+        }
+
+
+        public IList<IList<int>> CombinationSum(int[] candidates, int target) {
+            List<IList<int>> res = new();
+            Array.Sort(candidates);
+            helper(new List<int>());
+
+            return res;
+
+            void helper(List<int> l, int i = 0, int sum = 0) {
+                if (sum > target) {
+                    return;
+                }
+                if (sum == target) {
+                    res.Add(l.ToArray());
+                }
+
+                for (; i < candidates.Length; i++) {
+                    l.Add(candidates[i]);
+                    helper(l, i, sum + candidates[i]);
+                    l.Remove(candidates[i]);
+                }
+            }
+        }
+
+
+        public void Rotate(int[][] matrix) {
+            int l = matrix.Length - 1, tmp;
+            for (int i = 0; i < l / 2 + 1; i++) {
+                for (int j = i; j < l - i; j++) {
+                    tmp = matrix[i][j];
+                    matrix[i][j] = matrix[l - j][i];
+                    matrix[l - j][i] = matrix[l - i][l - j];
+                    matrix[l - i][l - j] = matrix[j][l - i];
+                    matrix[j][l - i] = tmp;
+                }
+            }
+        }
+
+        public int[] SearchRange(int[] nums, int target) {
+            (int l, int m, int r, bool found) tmp = (0, 0, nums.Length - 1, false);
+
+            int index = bsearch(() => (nums[tmp.m] - target) switch {
+                    < 0 => (tmp.m + 1, tmp.m, tmp.r, false),
+                    > 0 => (tmp.l, tmp.m, tmp.m - 1, false),
+                    0 => (tmp.l, tmp.m, tmp.r, true)
+            });
+
+            tmp = (0, tmp.m, index, false);
+            int li = bsearch(() => (nums[tmp.m] - target) switch {
+                    < 0 => (tmp.m + 1, tmp.m, tmp.r, false),
+                    0 => tmp.m == 0 || nums[tmp.m - 1] < target ? (tmp.l, tmp.m, tmp.r, true) : (tmp.l, tmp.m, tmp.m - 1, false)
+            });
+
+            tmp = (index == -1 ? nums.Length : index, tmp.m, nums.Length - 1, false);
+            int ri = bsearch(() => (nums[tmp.m] - target) switch {
+                    > 0 => (tmp.l, tmp.m, tmp.m - 1, false),
+                    0 => tmp.m == nums.Length - 1 || nums[tmp.m + 1] > target ? (tmp.l, tmp.m, tmp.r, true) : (tmp.m + 1, tmp.m, tmp.r, false)
+            });
+
+            return new int[] { li, ri };
+            
+            int bsearch(Func<(int, int, int, bool)> condition) {
+                if (tmp.l > tmp.r) return -1;
+                tmp.m = (tmp.l + tmp.r) / 2;
+                return (tmp = condition()).found ? tmp.m : bsearch(condition);
+            }
+        }
+
+        public int ThreeSumClosest(int[] nums, int target) {
+            int i = 0, j = 1, k = 2, res = Math.Abs(nums[i] + nums[j] + nums[k] - target), tmp = res;
+            for (; i < nums.Length - 2; i++) {
+                for (; j < nums.Length - 1; j++) {
+                    for (; k < nums.Length; k++) {
+                        tmp = Math.Abs(nums[i] + nums[j] + nums[k] - target);
+                        res = Math.Min(res, tmp);
+                        if (tmp > res) break;
+                    }
+                }
+            }
+            return 0;
+        }
+
+        public int[][] Insert(int[][] i, int[] n) {
+            List<(int[] x, int y)> l = i.Select((x, y) => (x, y)).Where(z => n[1] >= z.x[0] && n[0] <= z.x[1]).ToList();
+
+            return null;
+        }
+
+        public bool MakeStringsEqual(string s, string t) {
+            if (s.Equals(t)) return true;
+            int s1 = s.FirstOrDefault(x => x == '1', '0'), t1 = t.FirstOrDefault(x => x == '1', '0');
+            if (s1 == t1) return false;
+            return true;
+        }
+
+        public int[][] SortTheStudents(int[][] score, int k) {
+            PriorityQueue<int[], int> pq = new();
+            foreach(var arr in score) {
+                pq.Enqueue(arr, arr[k]);
+            }
+            int[][] res = new int[score.Length][];
+            for (int i = score.Length - 1; i >= 0; i--) {
+                res[i] = pq.Dequeue();
+            }
+            return res;
+        }
 
     }
 }

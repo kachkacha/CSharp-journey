@@ -1,49 +1,51 @@
-﻿using ConsoleApp1;
-using static ConsoleApp1.Chapter4;
+﻿
+using System.Reflection;
 
-//var chapter = new Chapter4();
-//chapter.Run();
-
-var v = new Class2(new Class1("const init"));
-Console.WriteLine(v.i);
-car c = new("", 5, "");
-car a = c with { };
-Console.WriteLine($"{a == c} {ReferenceEquals(a, c)}");
+int m = 10, n = 10;
+var matrix = new int[m, n];
+var points = fill(matrix, m, n);
+print(matrix, m, n);
+solve(matrix, m, n, points);
+Console.WriteLine();
 
 
-
-
-record struct st
-{
-    public int i { get; init; }
-
-    public void opa()
-    {
+void print(int[,] matrix, int m, int n) {
+    Console.WriteLine("\n\n");
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            Console.Write($" {matrix[i, j]} ");
+        }
         Console.WriteLine();
     }
 }
 
-record car (string make, int model, string color);
-
-
-class Class1
-{
-    public Class1(string s)
-    {
-        Console.WriteLine(s);
+(int x1, int x2, int y1, int y2) fill(int[,] matrix, int m, int n) {
+    var rand = new Random();
+    var oneposibility = 0.5;
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            matrix[i, j] = (int)(rand.NextDouble() + oneposibility);
+        }
     }
+    (int, int) x = (rand.Next(m), rand.Next(n));
+    (int, int) y = (rand.Next(m), rand.Next(n));
+    matrix[x.Item1, x.Item2] = 2;
+    matrix[y.Item1, y.Item2] = 4;
+
+    return (x.Item1, x.Item2, y.Item1, y.Item2);
 }
 
-class Class2
-{
-    public Class1 class1 { get; set; } = new Class1("field init");
-    public int i = 1;
+void solve(int[,] matrix, int m, int n, (int x1, int x2, int y1, int y2) points) {
+    var traveledpoints = new Queue<List<(int, int)>>();
+    traveledpoints.Enqueue(new List<(int, int)>() { (points.x1, points.x2) });
+    while (true) {
+        foreach (var item in traveledpoints) {
 
-    //public Class2() { }
-
-    public Class2(Class1 class1)
-    {
-        this.class1 = class1;
-        i = 2;
+            if (item.Last().Item1 - 1 > 0 && matrix[item.Last().Item1 - 1, item.Last().Item2] == 1 ) {
+                matrix[item.Last().Item1 - 1, item.Last().Item2] = 3;
+                
+            }
+        }
     }
+
 }
