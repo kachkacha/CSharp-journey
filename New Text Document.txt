@@ -1,0 +1,12 @@
+Faulting application name: NotificationListener.exe, version: 1.0.0.0, time stamp: 0x61e1d8d9
+Faulting module name: coreclr.dll, version: 6.0.222.6406, time stamp: 0x61e1d09e
+Exception code: 0xc0000005
+Fault offset: 0x00000000001cd72f
+Faulting process id: 0x26fc
+Faulting application start time: 0x01d96d7509c11cee
+Faulting application path: D:\Windows-Services\LBNotificationListener\Current\NotificationListener.exe
+Faulting module path: D:\Windows-Services\LBNotificationListener\Current\coreclr.dll
+Report Id: 05b3e60e-8e62-4afd-ad43-32988fa6f5d4
+Faulting package full name: 
+Faulting package-relative application ID:  
+Application: NotificationListener.exe CoreCLR Version: 6.0.222.6406 .NET Version: 6.0.2 Description: The process was terminated due to an internal error in the .NET Runtime at IP 00007FF98A9BD72F (00007FF98A7F0000) with exit code c0000005.
