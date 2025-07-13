@@ -1,0 +1,24 @@
+Task<T> GetOneAsync<T>(
+    bool asNoTracking,
+    KeyValuePair<Expression<Func<T, object>>, Expression<Func<object, object>>[]>[] includePairs,
+    Expression<Func<T, bool>> predicate,
+    QueryMode queryMode
+    ) where T : class;
+
+Task<List<T>> GetManyAsync<T>(
+    bool asNoTracking,
+    KeyValuePair<Expression<Func<T, object>>, Expression<Func<object, object>>[]>[] includePairs,
+    Expression<Func<T, bool>> predicate,
+    Expression<Func<T, object>>? orderBy = null,
+    bool orderByDescending = false
+    ) where T : class;
+
+Task<(List<T> Data, int TotalCount)> GetManyWithPaginationAsync<T>(
+    bool asNoTracking,
+    KeyValuePair<Expression<Func<T, object>>, Expression<Func<object, object>>[]>[] includePairs,
+    Expression<Func<T, bool>> predicate,
+    Expression<Func<T, object>> orderBy,
+    bool orderByDescending,
+    int pageNumber,
+    int pageSize
+    ) where T : class;
