@@ -1,54 +1,61 @@
-public Task<T> GetOneAsync<T>(
-    bool asNoTracking,
-    KeyValuePair<Expression<Func<T, object>>, Expression<Func<object, object>>[]>[] includePairs,
-    Expression<Func<T, bool>> predicate,
-    QueryMode queryMode
-    ) where T : class
+public static IQueryable<T> ApplyIncludes<T>(this DbSet<T> dbSet, KeyValuePair<Expression<Func<T, object>>, Expression<Func<object, object>>[]>[] includePairs) where T : class
 {
-    var entity = _context.Set<T>()
-        .ApplyIncludes(includePairs)
-        .ApplyTracking(!asNoTracking)
-        .ApplyQueryModeAsync(predicate, queryMode);
+    if (includePairs is null || includePairs.Length == 0)
+        return dbSet;
 
-    return entity;
-}
+    IIncludableQueryable<T, object>? entities = default;
 
-public Task<List<T>> GetManyAsync<T>(
-    bool asNoTracking,
-    KeyValuePair<Expression<Func<T, object>>, Expression<Func<object, object>>[]>[] includePairs,
-    Expression<Func<T, bool>> predicate,
-    Expression<Func<T, object>>? orderBy = null,
-    bool orderByDescending = false
-    ) where T : class
-{
-    var entities = _context.Set<T>()
-        .ApplyIncludes(includePairs)
-        .ApplyTracking(asNoTracking)
-        .Where(predicate)
-        .ApplyOrdering(orderBy, orderByDescending)
-        .ToListAsync();
+    foreach (var includePair in includePairs)
+    {
+        if (entities is null)
+            entities = dbSet.Include(includePair.Key);
+        else
+            entities = entities.Include(includePair.Key);
+
+        foreach (var thenInclude in includePair.Value)
+            entities = entities.ThenInclude(thenInclude);
+    }
 
     return entities;
 }
 
-public async Task<(List<T> Data, int TotalCount)> GetManyWithPaginationAsync<T>(
-    bool asNoTracking,
-    KeyValuePair<Expression<Func<T, object>>, Expression<Func<object, object>>[]>[] includePairs,
-    Expression<Func<T, bool>> predicate,
-    Expression<Func<T, object>> orderBy,
-    bool orderByDescending,
-    int pageNumber,
-    int pageSize
-    ) where T : class
+public static IQueryable<T> ApplyTracking<T>(this IQueryable<T> query, bool tracking) where T : class
 {
-    var filtered = _context.Set<T>()
-        .ApplyIncludes(includePairs)
-        .ApplyTracking(asNoTracking)
-        .Where(predicate)
-        .ApplyOrdering(orderBy, orderByDescending);
+    if (tracking)
+        query = query.AsTracking();
 
-    var totalCount = await filtered.CountAsync();
-    var paginated = await filtered.ApplyPaginationAsync(pageNumber, pageSize, totalCount);
+    return query;
+}
 
-    return (paginated, totalCount);
+public static IQueryable<T> ApplyOrdering<T>(this IQueryable<T> query, Expression<Func<T, object>>? orderBy, bool orderByDescending) where T : class
+{
+    if (orderBy != null)
+        query = orderByDescending ? query.OrderByDescending(orderBy) : query.OrderBy(orderBy);
+
+    return query;
+}
+
+public static Task<T> ApplyQueryModeAsync<T>(this IQueryable<T> query, Expression<Func<T, bool>> predicate, QueryMode queryMode) where T : class
+{
+    var entity = queryMode switch
+    {
+        QueryMode.First => query.FirstAsync(predicate),
+        QueryMode.FirstOrDefault => query.FirstOrDefaultAsync(predicate),
+        QueryMode.Single => query.SingleAsync(predicate),
+        QueryMode.SingleOrDefault => query.SingleOrDefaultAsync(predicate),
+        _ => throw new ArgumentOutOfRangeException(nameof(queryMode), queryMode, null)
+    };
+
+    return entity;
+}
+
+public static async Task<List<T>> ApplyPaginationAsync<T>(this IQueryable<T> query, int pageNumber, int pageSize, int totalCount)
+{
+    var skip = (pageNumber - 1) * pageSize;
+    var take = Math.Min(pageSize, totalCount - skip);
+
+    if (skip > totalCount)
+        return [];
+
+    return await query.Skip(skip).Take(take).ToListAsync();
 }
