@@ -1,19 +1,37 @@
-Task<T> GetOneAsync<T>(
+public Task<T> GetOneAsync<T>(
     bool asNoTracking,
     KeyValuePair<Expression<Func<T, object>>, Expression<Func<object, object>>[]>[] includePairs,
     Expression<Func<T, bool>> predicate,
     QueryMode queryMode
-    ) where T : class;
+    ) where T : class
+{
+    var entity = _context.Set<T>()
+        .ApplyIncludes(includePairs)
+        .ApplyTracking(!asNoTracking)
+        .ApplyQueryModeAsync(predicate, queryMode);
 
-Task<List<T>> GetManyAsync<T>(
+    return entity;
+}
+
+public Task<List<T>> GetManyAsync<T>(
     bool asNoTracking,
     KeyValuePair<Expression<Func<T, object>>, Expression<Func<object, object>>[]>[] includePairs,
     Expression<Func<T, bool>> predicate,
     Expression<Func<T, object>>? orderBy = null,
     bool orderByDescending = false
-    ) where T : class;
+    ) where T : class
+{
+    var entities = _context.Set<T>()
+        .ApplyIncludes(includePairs)
+        .ApplyTracking(asNoTracking)
+        .Where(predicate)
+        .ApplyOrdering(orderBy, orderByDescending)
+        .ToListAsync();
 
-Task<(List<T> Data, int TotalCount)> GetManyWithPaginationAsync<T>(
+    return entities;
+}
+
+public async Task<(List<T> Data, int TotalCount)> GetManyWithPaginationAsync<T>(
     bool asNoTracking,
     KeyValuePair<Expression<Func<T, object>>, Expression<Func<object, object>>[]>[] includePairs,
     Expression<Func<T, bool>> predicate,
@@ -21,4 +39,16 @@ Task<(List<T> Data, int TotalCount)> GetManyWithPaginationAsync<T>(
     bool orderByDescending,
     int pageNumber,
     int pageSize
-    ) where T : class;
+    ) where T : class
+{
+    var filtered = _context.Set<T>()
+        .ApplyIncludes(includePairs)
+        .ApplyTracking(asNoTracking)
+        .Where(predicate)
+        .ApplyOrdering(orderBy, orderByDescending);
+
+    var totalCount = await filtered.CountAsync();
+    var paginated = await filtered.ApplyPaginationAsync(pageNumber, pageSize, totalCount);
+
+    return (paginated, totalCount);
+}
